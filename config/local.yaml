@@ -1,0 +1,11 @@
+env: "local"
+postgres:
+  host: "postgres"
+  port: "5432"
+  user: "todo_user"
+  password: "todo_password"
+  dbname: "todo"
+http_server:
+  address: "0.0.0.0:8082"
+  timeout: 4s
+  idle_timeout: 60s

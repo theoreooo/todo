@@ -1,0 +1,276 @@
+basePath: /
+definitions:
+  handlers.Response:
+    description: Ответ обработчика
+    properties:
+      data:
+        description: Данные ответа
+      error:
+        description: Сообщение об ошибке (если есть)
+        example: something went wrong
+        type: string
+      status:
+        description: Статус ответа (OK/Error)
+        example: OK
+        type: string
+    type: object
+  models.Task:
+    description: Задача пользователя
+    properties:
+      created_at:
+        description: Дата создания
+        example: "2025-04-17T10:30:00Z"
+        type: string
+      description:
+        description: Описание задачи
+        example: Купить 2 литра молока в магазине
+        type: string
+      due_date:
+        description: Дата выполнения
+        example: "2025-04-20T15:00:00Z"
+        type: string
+      id:
+        description: Уникальный идентификатор задачи
+        example: 1
+        type: integer
+      status:
+        description: Статус выполнения (true - выполнена, false - не выполнена)
+        example: false
+        type: boolean
+      title:
+        description: Заголовок задачи
+        example: Купить молоко
+        type: string
+      updated_at:
+        description: Дата обновления
+        example: "2025-04-17T10:30:00Z"
+        type: string
+    required:
+    - due_date
+    - title
+    type: object
+  models.TasksList:
+    description: Список задач с пагинацией
+    properties:
+      data:
+        description: Массив задач
+        items:
+          $ref: '#/definitions/models.Task'
+        type: array
+      limit:
+        description: Количество элементов на странице
+        example: 10
+        type: integer
+      page:
+        description: Текущая страница
+        example: 1
+        type: integer
+      total:
+        description: Общее количество задач
+        example: 42
+        type: integer
+    type: object
+  response.Response:
+    description: Стандартный ответ API
+    properties:
+      error:
+        description: Сообщение об ошибке (если есть)
+        example: something went wrong
+        type: string
+      status:
+        description: Статус ответа (OK/Error)
+        example: OK
+        type: string
+    type: object
+host: localhost:8082
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API сервер для управления задачами
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: ToDo API
+  version: "1.0"
+paths:
+  /newtask:
+    post:
+      consumes:
+      - application/json
+      description: Создать новую задачу с указанными данными
+      parameters:
+      - description: Данные задачи
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Task'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Создать новую задачу
+      tags:
+      - tasks
+  /tasks:
+    get:
+      consumes:
+      - application/json
+      description: Получить список задач с пагинацией и фильтрацией
+      parameters:
+      - default: 1
+        description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Количество элементов на странице
+        in: query
+        name: limit
+        type: integer
+      - description: Статус задачи (true - выполнена, false - не выполнена)
+        in: query
+        name: completed
+        type: boolean
+      - description: Дата в формате YYYY-MM-DD
+        in: query
+        name: date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TasksList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Получить список задач
+      tags:
+      - tasks
+  /tasks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удалить задачу по её идентификатору
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Удалить задачу
+      tags:
+      - tasks
+    get:
+      consumes:
+      - application/json
+      description: Получить задачу по её идентификатору
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Task'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Получить задачу по ID
+      tags:
+      - tasks
+    put:
+      consumes:
+      - application/json
+      description: Обновить существующую задачу по ID
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные задачи для обновления
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Task'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Обновить задачу
+      tags:
+      - tasks
+schemes:
+- http
+swagger: "2.0"
